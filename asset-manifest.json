@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "//karumine.github.io/Demo-Tracker-Build/static/css/main.8c12339c.css",
+    "main.js": "//karumine.github.io/Demo-Tracker-Build/static/js/main.37d5a945.js",
+    "static/js/453.5a67f7ea.chunk.js": "//karumine.github.io/Demo-Tracker-Build/static/js/453.5a67f7ea.chunk.js",
+    "static/media/bootstrap-icons.woff?": "//karumine.github.io/Demo-Tracker-Build/static/media/bootstrap-icons.1295669cd4e305c97f2c.woff",
+    "static/media/bootstrap-icons.woff2?": "//karumine.github.io/Demo-Tracker-Build/static/media/bootstrap-icons.92ea18a81d737146ff04.woff2",
+    "index.html": "//karumine.github.io/Demo-Tracker-Build/index.html",
+    "main.8c12339c.css.map": "//karumine.github.io/Demo-Tracker-Build/static/css/main.8c12339c.css.map",
+    "main.37d5a945.js.map": "//karumine.github.io/Demo-Tracker-Build/static/js/main.37d5a945.js.map",
+    "453.5a67f7ea.chunk.js.map": "//karumine.github.io/Demo-Tracker-Build/static/js/453.5a67f7ea.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.8c12339c.css",
+    "static/js/main.37d5a945.js"
+  ]
+}
