@@ -21,18 +21,18 @@ const mapContainerStyle = {
 
 // ข้อมูลจำลองพิกัดสำหรับ Locations ต่างๆ (ในโลกจริงต้องใช้ Geocoding API)
 const locations: { [key: string]: { lat: number; lng: number } } = {
-    "เมือง, กรุงเทพมหานคร": { lat: 13.736717, lng: 100.523186 },
-    "ถลาง, ภูเก็ต": { lat: 8.040051, lng: 98.31295 },
-    "เมือง, เชียงใหม่": { lat: 18.788322, lng: 98.987251 },
-    "หาดใหญ่, สงขลา": { lat: 7.005063, lng: 100.470512 },
-    "เมือง, ขอนแก่น": { lat: 16.432362, lng: 102.822769 },
-    "บางละมุง, ชลบุรี": { lat: 12.980656, lng: 100.91617 },
-    "ปากเกร็ด, นนทบุรี": { lat: 13.914298, lng: 100.518669 },
-    "เมือง, ชลบุรี": { lat: 13.361927, lng: 100.984024 },
-    "เมือง, อยุธยา": { lat: 14.35626, lng: 100.56942 },
-    "เมือง, ระยอง": { lat: 12.67807, lng: 101.27216 },
-    "เมือง, สมุทรปราการ": { lat: 13.600000, lng: 100.600000 },
-    "เมือง, นครราชสีมา": { lat: 14.977465, lng: 102.062363 },
+  "เมือง, กรุงเทพมหานคร": { lat: 13.736717, lng: 100.523186 },
+  "ถลาง, ภูเก็ต": { lat: 8.040051, lng: 98.31295 },
+  "เมือง, เชียงใหม่": { lat: 18.788322, lng: 98.987251 },
+  "หาดใหญ่, สงขลา": { lat: 7.005063, lng: 100.470512 },
+  "เมือง, ขอนแก่น": { lat: 16.432362, lng: 102.822769 },
+  "บางละมุง, ชลบุรี": { lat: 12.980656, lng: 100.91617 },
+  "ปากเกร็ด, นนทบุรี": { lat: 13.914298, lng: 100.518669 },
+  "เมือง, ชลบุรี": { lat: 13.361927, lng: 100.984024 },
+  "เมือง, อยุธยา": { lat: 14.35626, lng: 100.56942 },
+  "เมือง, ระยอง": { lat: 12.67807, lng: 101.27216 },
+  "เมือง, สมุทรปราการ": { lat: 13.600000, lng: 100.600000 },
+  "เมือง, นครราชสีมา": { lat: 14.977465, lng: 102.062363 },
 };
 
 function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void }) {
@@ -42,17 +42,11 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
     { label: "Check In", time: "11:15 AM", icon: "bi-box", color: "info" },
     { label: "On Delivery", time: "1:45 PM", icon: "bi-truck", color: "warning" },
     { label: "Check out", time: "3:30 PM", icon: "bi-arrow-right", color: "secondary" },
-    { label: "Delivered", time: "4:00 PM", icon: "bi-check-lg", color: "secondary" },
+    { label: "Delivered", time: "4:00 PM", icon: "bi-truck", color: "secondary" },
   ];
 
   const currentStatusIndex = allStages.findIndex(s => s.label === selected.status);
 
-  // กรองเอาเฉพาะ Stage ที่เสร็จแล้วหรือกำลังดำเนินการเท่านั้น
-  const stages = allStages.filter((s, index) => index <= currentStatusIndex).map((s, index) => ({
-    ...s,
-    isCompleted: index < currentStatusIndex,
-    isActive: index === currentStatusIndex,
-  }));
 
   // State สำหรับเก็บพิกัดแผนที่
   const [center, setCenter] = useState(locations[selected.location] || { lat: 13.736717, lng: 100.523186 });
@@ -105,25 +99,58 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
 
       {/* Stage Tracking Timeline */}
       <section className="card shadow-sm p-4 mb-4">
-        <div className="d-flex justify-content-between align-items-center">
-          {stages.map((s, i) => (
-            <div key={i} className="text-center position-relative flex-grow-1">
-              <Stage
-                icon={s.icon}
-                label={s.label}
-                time={s.time}
-                isCompleted={s.isCompleted}
-                isActive={s.isActive}
-                color={s.color}
-              />
-              {i < stages.length - 1 && (
-                <div
-                  className={`position-absolute top-50 start-100 translate-middle-y w-100 ${s.isCompleted || s.isActive ? 'bg-primary' : 'bg-secondary'}`}
-                  style={{ height: '2px', zIndex: -1 }}
+        <div className="d-flex justify-content-between align-items-start">
+          {allStages.map((s, i) => {
+            const isDelivered = selected.status === "Delivered";
+            const isCompleted = isDelivered || i < currentStatusIndex;
+            const isActive = !isDelivered && i === currentStatusIndex;
+            const isNotStarted = !isDelivered && i > currentStatusIndex;
+
+            let stageIcon;
+            let stageColor;
+            let stageTime;
+            let progressLineColor;
+
+            if (isDelivered) {
+              stageIcon = "bi-check-lg";
+              stageColor = "success";
+              stageTime = s.time;
+              progressLineColor = 'bg-primary';
+            } else {
+              if (isCompleted) {
+                stageIcon = "bi-check-lg";
+                stageColor = "success";
+                stageTime = s.time;
+              } else if (isActive) {
+                stageIcon = "spinner-border spinner-border-sm text-primary";
+                stageColor = s.color;
+                stageTime = s.time;
+              } else {
+                stageIcon = s.icon;
+                stageColor = "secondary";
+                stageTime = null;
+              }
+              progressLineColor = isCompleted || isActive ? 'bg-primary' : 'bg-secondary';
+            }
+
+            return (
+              <div key={i} className="text-center position-relative flex-grow-1">
+                <Stage
+                  icon={stageIcon}
+                  label={s.label}
+                  time={stageTime}
+                  isCompleted={isCompleted}
+                  isActive={isActive}
+                  color={stageColor}
                 />
-              )}
-            </div>
-          ))}
+                {i < allStages.length - 1 && (
+                  <div className={`position-absolute top-50 start-100 translate-middle-y w-100 ${progressLineColor}`}
+                    style={{ height: '2px', zIndex: -1 }}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -161,7 +188,7 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
               <div className="d-flex align-items-center gap-2">
                 <img src={signatureUrl} alt="Customer signature" className="rounded-3" style={{ width: '7rem', height: '5rem', objectFit: 'contain' }} />
                 <a className="link-primary small text-decoration-none" href="#">
-                    <i className="bi bi-file-earmark-pdf-fill me-1"></i> PackingList.pdf
+                  <i className="bi bi-file-earmark-pdf-fill me-1"></i> PackingList.pdf
                 </a>
               </div>
             </div>
@@ -176,14 +203,14 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
                   mapContainerStyle={mapContainerStyle}
                   options={mapOptions}
                 >
-                    {/* เพิ่ม Marker ที่นี่ */}
-                    <Marker position={center} />
+                  {/* เพิ่ม Marker ที่นี่ */}
+                  <Marker position={center} />
                 </GoogleMap>
               ) : (
                 <div className="d-flex justify-content-center align-items-center h-100">
-                    <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -201,7 +228,7 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
             { label: "😊", bg: "#EEF8E1" },
             { label: "🟢", bg: "#E6F6E6" },
           ].map((e, idx) => (
-            <Emoji key={idx} label={e.label} bg={e.bg} active={false} onClick={() => {}} />
+            <Emoji key={idx} label={e.label} bg={e.bg} active={false} onClick={() => { }} />
           ))}
         </div>
       </section>

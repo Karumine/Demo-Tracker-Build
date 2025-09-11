@@ -28,11 +28,91 @@
   color: #61dafb;
 }
 
+
+/* สำหรับ Desktop: Sidebar แสดงอยู่ด้านซ้าย, Main Content อยู่ด้านขวา */
+.app-sidebar {
+  width: 250px;
+  /* กำหนดความกว้างของ Sidebar */
+  flex-shrink: 0;
+  /* ป้องกันไม่ให้ Sidebar หดตัว */
+  /* ตำแหน่งและ transition สำหรับ desktop จะจัดการโดย flexbox */
+}
+
+.app-main-content {
+  flex-grow: 1;
+  /* ให้ Main Content ขยายเต็มพื้นที่ที่เหลือ */
+}
+
+
+/* ซ่อน Sidebar และแสดงปุ่ม Hamburger เมื่อหน้าจอมีขนาดเล็กกว่า 1000px */
+@media (min-width: 992px) {
+  .app-sidebar {
+    display: flex !important;
+    /* ให้ Sidebar แสดงเสมอในหน้าจอขนาดใหญ่ */
+  }
+
+  .mobile-only-button {
+    display: none !important;
+    /* ซ่อนปุ่ม Hamburger และปุ่มปิดบนหน้าจอขนาดใหญ่ */
+  }
+}
+
+/* สำหรับ Mobile: Sidebar จะเป็น overlay */
+@media (max-width: 992.00px) {
+
+  .app-sidebar {
+    position: fixed;
+    /* ทำให้ Sidebar ลอยอยู่เหนือ content */
+    top: 0;
+    left: -250px;
+    /* ซ่อน Sidebar ไว้ด้านซ้ายนอกจอ */
+    height: 100vh;
+    /* ให้ Sidebar สูงเต็มจอ */
+    z-index: 1050;
+    /* กำหนด z-index ให้สูงกว่า content อื่นๆ */
+    transition: left 0.3s ease-in-out;
+    /* เพิ่ม animation การเลื่อน */
+  }
+
+  .app-sidebar.open {
+    left: 0;
+    /* เมื่อ Sidebar เปิด ให้เลื่อนเข้ามาในจอ */
+  }
+
+  /* Overlay ที่จะแสดงเมื่อ Sidebar เปิดอยู่ เพื่อบัง Main Content */
+  .app-sidebar.open+.app-main-content::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* สีดำโปร่งแสง */
+    z-index: 1040;
+    /* ต่ำกว่า Sidebar แต่สูงกว่า Main Content */
+  }
+
+  /* ปรับ Main Content ไม่ให้มี margin-left เกินจำเป็น */
+  .app-main-content {
+    margin-left: 0 !important;
+  }
+
+  .mobile-only-button {
+    display: block !important;
+    /* แสดงปุ่ม Hamburger และปุ่มปิดบนหน้าจอขนาดเล็ก */
+  }
+}
+
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+
 }

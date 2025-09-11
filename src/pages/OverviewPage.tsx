@@ -15,59 +15,100 @@ function OverviewPage({ onSelect, orders }: { onSelect: (o: Order) => void; orde
 
   const [form, setForm] = React.useState<Order>({ id: "OR123999", date: "01/03/2024", customer: "New Customer", status: "Check In", location: "เมือง, กรุงเทพมหานคร" });
 
+  React.useEffect(() => {
+    if (showAdd) {
+      document.body.style.overflow = 'hidden'; // Prevent scrolling on body
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [showAdd]);
+
+  const handleCreateOrder = () => {
+    setList((prev) => [form, ...prev]);
+    setShowAdd(false);
+    setForm({ id: "OR" + Math.floor(Math.random() * 100000), date: new Date().toLocaleDateString('th-TH'), customer: "", status: "Check In", location: "" });
+  };
+
   return (
     <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h2">Order Tracking Overview</h1>
-        <div className="d-flex gap-2">
-          <div className="position-relative">
+      <div className="d-flex flex-column flex-md-row justify-content-md-between align-items-center mb-4">
+        <h1 className="h2 mb-3 mb-md-0">Order Tracking Overview</h1>
+        <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
+          <div className="position-relative w-100 w-sm-auto">
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
+              placeholder="Search..."
               className="form-control"
             />
           </div>
-          <button onClick={() => setShowAdd(true)} className="btn btn-primary">
+          <button onClick={() => setShowAdd(true)} className="btn btn-primary w-100 w-sm-auto">
             Add Order
           </button>
         </div>
       </div>
 
       <div className="card shadow-sm">
-        <div className="card-header bg-light text-secondary fw-bold">
+        <div className="card-header bg-light text-secondary fw-bold d-none d-md-block">
           <div className="row">
-            <div className="col-2">ORDER</div>
-            <div className="col-2">DATE</div>
-            <div className="col-3">CUSTOMER</div>
-            <div className="col-2">STATUS</div>
-            <div className="col-3">LOCATION</div>
+            <div className="col-md-2">ORDER</div>
+            <div className="col-md-2">DATE</div>
+            <div className="col-md-2">CUSTOMER</div>
+            <div className="col-md-3">STATUS</div>
+            <div className="col-md-3">LOCATION</div>
           </div>
         </div>
         <div className="list-group list-group-flush">
-          {filtered.map((o, idx) => (
-            <button
-              key={o.id}
-              onClick={() => onSelect(o)}
-              className="list-group-item list-group-item-action"
-            >
-              <div className="row align-items-center">
-                <div className="col-2 fw-bold">{o.id}</div>
-                <div className="col-2">{o.date}</div>
-                <div className="col-3">{o.customer}</div>
-                <div className="col-2">
-                  <StatusPill status={o.status} />
+          {filtered.length > 0 ? (
+            filtered.map((o) => (
+              <button
+                key={o.id}
+                onClick={() => onSelect(o)}
+                className="list-group-item list-group-item-action"
+              >
+                <div className="row g-2 align-items-center">
+                  {/* Order ID */}
+                  <div className="col-12 col-md-2">
+                    <span className="d-inline d-md-none fw-bold">ORDER: </span>
+                    <span className="fw-bold">{o.id}</span>
+                  </div>
+                  {/* Date */}
+                  <div className="col-12 col-md-2">
+                    <span className="d-inline d-md-none fw-bold">Date: </span>
+                    {o.date}
+                  </div>
+                  {/* Customer */}
+                  <div className="col-12 col-md-2">
+                    <span className="d-inline d-md-none fw-bold">Customer: </span>
+                    {o.customer}
+                  </div>
+                  {/* Status */}
+                  <div className="col-12 col-md-3">
+                    <span className="d-inline d-md-none fw-bold">Status: </span>
+                    <StatusPill status={o.status} />
+                  </div>
+                  {/* Location */}
+                  <div className="col-12 col-md-3">
+                    <span className="d-inline d-md-none fw-bold">Location: </span>
+                    {o.location}
+                  </div>
                 </div>
-                <div className="col-3">{o.location}</div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))
+          ) : (
+            <div className="p-4 text-center text-muted">No orders found.</div>
+          )}
         </div>
       </div>
 
       {showAdd && (
-        <div className="modal d-block" tabIndex={-1} role="dialog">
-          <div className="modal-dialog modal-dialog-centered" role="document">
+        <div className="modal d-block bg-black bg-opacity-50" tabIndex={-1} role="dialog" onClick={(e) => {
+          const target = e.target as HTMLElement; 
+          if (target.classList.contains('modal')) {
+            setShowAdd(false);
+          }
+        }}>
+          <div className="modal-dialog modal-dialog-centered" role="document" onClick={e => e.stopPropagation()}>
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Add Order</h5>
@@ -76,11 +117,11 @@ function OverviewPage({ onSelect, orders }: { onSelect: (o: Order) => void; orde
               <div className="modal-body">
                 <form>
                   <div className="row g-3">
-                    <div className="col-md-6">
+                    <div className="col-12">
                       <label htmlFor="orderNo" className="form-label">Order No.</label>
                       <input type="text" className="form-control" id="orderNo" value={form.id} onChange={(e) => setForm({ ...form, id: e.target.value })} />
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-12">
                       <label htmlFor="date" className="form-label">Date</label>
                       <input type="text" className="form-control" id="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
                     </div>
@@ -109,10 +150,7 @@ function OverviewPage({ onSelect, orders }: { onSelect: (o: Order) => void; orde
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setList((prev) => [form, ...prev]);
-                    setShowAdd(false);
-                  }}
+                  onClick={handleCreateOrder}
                 >
                   Create
                 </button>
