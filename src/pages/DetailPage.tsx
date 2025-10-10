@@ -1,14 +1,15 @@
 // src/pages/DetailPage.tsx
 
 import React, { useState, useEffect } from "react";
-import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api"; // <-- เพิ่ม Marker ที่นี่
+import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import { Order } from "../types";
 import Stage from "../components/Stage";
 import Badge from "../components/Badge";
 import Emoji from "../components/Emoji";
+import StatusPill from "../components/StatusPill";
 
 // URLs ของรูปภาพ
-const avatarUrl = "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=160&auto=format&fit=crop";
+const avatarUrl = "https://png.pngtree.com/png-clipart/20190115/ourlarge/pngtree-hand-drawn-cartoon-send-delivery-shopping-pickpocket-png-image_362759.jpg";
 const boxUrl = "https://img.freepik.com/premium-vector/cartoon-style-parcel-box-thin-icon-vector-illustration_1323048-54962.jpg";
 const signatureUrl = "https://a.storyblok.com/f/191576/1176x882/0707bde47c/make_signature_hero_after.webp";
 
@@ -18,6 +19,16 @@ const mapContainerStyle = {
   height: '100%',
   minHeight: '12rem',
 };
+
+// =======================================================
+// ⚡️ 1. Interface สำหรับ Delivery Details ⚡️
+// =======================================================
+interface DeliveryDetails {
+  deliveryId: string;
+  sender: string;   // คนขับ/ผู้ส่ง
+  receiver: string; // ผู้รับ
+  // สามารถเพิ่มข้อมูลอื่น ๆ จาก Delivery API ได้
+}
 
 // ข้อมูลจำลองพิกัดสำหรับ Locations ต่างๆ (ในโลกจริงต้องใช้ Geocoding API)
 const locations: { [key: string]: { lat: number; lng: number } } = {
@@ -36,6 +47,11 @@ const locations: { [key: string]: { lat: number; lng: number } } = {
 };
 
 function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void }) {
+  // =======================================================
+  // ⚡️ 2. State สำหรับ Delivery Details ⚡️
+  // =======================================================
+  const [deliveryDetails, setDeliveryDetails] = useState<DeliveryDetails | null>(null);
+
   // สร้าง mapping ของ status กับ Stages
   const allStages = [
     { label: "Confirmed", time: "10:30 AM", icon: "bi-check-lg", color: "success" },
@@ -57,17 +73,51 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
     googleMapsApiKey: "AIzaSyC4qFRXRw5Eqcy-OPlqZb3ok0nACr2-9Nw", // <-- **แทนที่ด้วย API Key ของคุณ**
   });
 
-  // ใช้ useEffect เพื่ออัปเดต heading สำหรับการหมุนแผนที่
+  // =======================================================
+  // ⚡️ 3. Fetch Delivery Data ใน useEffect ⚡️
+  // =======================================================
   useEffect(() => {
-    // หาพิกัดจาก location ที่เลือก
+    // 1. Logic ดึงข้อมูล Delivery
+    const fetchDeliveryData = async () => {
+      try {
+        // สมมติว่า Delivery API คืนค่าเป็น Array ของ Deliveries ทั้งหมด
+        const response = await fetch("/api/Delivery");
+        if (!response.ok) throw new Error("Failed to fetch Delivery API");
+        const rawDeliveries: any[] = await response.json();
+
+        // ค้นหา Delivery ที่มี Order ID ปัจจุบันอยู่ในรายการ orderIds
+        const matchingDelivery = rawDeliveries.find((d: any) =>
+          d.orderIds && d.orderIds.includes(selected.id)
+        );
+
+        if (matchingDelivery) {
+          setDeliveryDetails({
+            deliveryId: matchingDelivery.deliveryId,
+            sender: matchingDelivery.sender,
+            receiver: matchingDelivery.receiver,
+          });
+        } else {
+          console.warn(`No matching delivery found for Order ID: ${selected.id}`);
+        }
+
+      } catch (error) {
+        console.error("Error fetching delivery details:", error);
+      }
+    };
+
+    fetchDeliveryData();
+
+    // 2. Logic สำหรับ Map/Heading เดิม
     if (locations[selected.location]) {
       setCenter(locations[selected.location]);
     }
     const interval = setInterval(() => {
-      setHeading(prev => (prev + 1) % 360); // เพิ่มค่า heading ทุกๆ 1 องศา
-    }, 50); // ความเร็วในการหมุน
+      setHeading(prev => (prev + 1) % 360);
+    }, 50);
+
     return () => clearInterval(interval);
-  }, [selected.location]); // dependency array เพื่อให้ effect ทำงานใหม่เมื่อ location เปลี่ยน
+
+  }, [selected.location, selected.id]); // เพิ่ม selected.id เป็น dependency
 
   // กำหนด options สำหรับแผนที่
   const mapOptions = {
@@ -83,6 +133,11 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
   if (loadError) {
     return <div>Error loading maps</div>;
   }
+
+  // กำหนดค่า Fallback
+  const recipientName = deliveryDetails?.receiver || selected.customer || "กำลังโหลด...";
+  const driverName = deliveryDetails?.sender || "กำลังโหลด...";
+
 
   return (
     <div className="p-4">
@@ -154,12 +209,13 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
         </div>
       </section>
 
-      {/* Other Sections (เหมือนเดิม) */}
+      {/* Other Sections (Delivering to & Driver/Sender) */}
       <section className="row g-4 mb-4">
         <div className="col-md-6">
           <div className="card shadow-sm p-4 h-100">
             <div className="text-muted small">Delivering to</div>
-            <div className="fw-bold fs-5">John Doe</div>
+            {/* ⚡️ แทนที่ John Doe ด้วย deliveryDetails?.receiver ⚡️ */}
+            <div className="fw-bold fs-5">{recipientName}</div>
             <div className="text-muted">+1 234 567 89000</div>
           </div>
         </div>
@@ -167,7 +223,8 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
           <div className="card shadow-sm p-4 d-flex flex-row align-items-center gap-3 h-100">
             <img src={avatarUrl} alt="Driver avatar" className="rounded-circle" style={{ width: '4rem', height: '4rem', objectFit: 'cover' }} />
             <div className="flex-grow-1">
-              <div className="fw-bold">Michael Smith</div>
+              {/* ⚡️ แทนที่ Michael Smith ด้วย deliveryDetails?.sender ⚡️ */}
+              <div className="fw-bold">{driverName}</div>
               <div className="text-muted small d-flex align-items-center gap-1">
                 <i className="bi bi-phone-fill"></i> +1 987 654 3210
               </div>
@@ -179,21 +236,41 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
         </div>
       </section>
 
+      {/* ======================================================= */}
+      {/* ⚡️ Conditional Rendering: Proof of Delivery & Live Map ⚡️ */}
+      {/* ======================================================= */}
       <section className="row g-4 mb-4 align-items-stretch">
-        <div className="col-md-6">
-          <div className="card shadow-sm p-4 h-100">
-            <div className="fw-bold mb-3">Proof of Delivery</div>
-            <div className="d-flex align-items-center gap-3">
-              <img src={boxUrl} className="rounded-3" style={{ width: '7rem', height: '5rem', objectFit: 'cover' }} alt="Parcel photo" />
-              <div className="d-flex align-items-center gap-2">
-                <img src={signatureUrl} alt="Customer signature" className="rounded-3" style={{ width: '7rem', height: '5rem', objectFit: 'contain' }} />
-                <a className="link-primary small text-decoration-none" href="#">
-                  <i className="bi bi-file-earmark-pdf-fill me-1"></i> PackingList.pdf
-                </a>
+        {/* Proof of Delivery จะแสดงเมื่อสถานะเป็น 'Delivered' แล้วเท่านั้น */}
+        {selected.status === "Delivered" ? (
+          <div className="col-md-6">
+            <div className="card shadow-sm p-4 h-100">
+              <div className="fw-bold mb-3">Proof of Delivery</div>
+              <div className="d-flex align-items-center gap-3">
+                <img src={boxUrl} className="rounded-3" style={{ width: '7rem', height: '5rem', objectFit: 'cover' }} alt="Parcel photo" />
+                <div className="d-flex align-items-center gap-2">
+                  <img src={signatureUrl} alt="Customer signature" className="rounded-3" style={{ width: '7rem', height: '5rem', objectFit: 'contain' }} />
+                  <a className="link-primary small text-decoration-none" href="#">
+                    <i className="bi bi-file-earmark-pdf-fill me-1"></i> PackingList.pdf
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          // แสดงส่วนนี้เมื่อสถานะยังไม่ Delivered (เช่น แสดงแค่ Live Map เต็มพื้นที่)
+          // เราอาจจะแสดงข้อมูลสรุป Order แทน Proof of Delivery ได้
+          <div className="col-md-6">
+            <div className="card shadow-sm p-4 h-100">
+              <div className="fw-bold mb-3">Order Details</div>
+              <p className="small text-muted">Product: {selected.id}</p>
+              <p className="small text-muted">Customer: {selected.customer}</p>
+              <p className="small text-muted">Location: {selected.location}</p>
+
+            </div>
+          </div>
+        )}
+
+        {/* Live Map จะแสดงตลอด */}
         <div className="col-md-6">
           <div className="card shadow-sm p-4 h-100">
             <div className="fw-bold mb-3">Live Map</div>
@@ -203,7 +280,6 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
                   mapContainerStyle={mapContainerStyle}
                   options={mapOptions}
                 >
-                  {/* เพิ่ม Marker ที่นี่ */}
                   <Marker position={center} />
                 </GoogleMap>
               ) : (
@@ -218,20 +294,25 @@ function DetailPage({ selected, onBack }: { selected: Order; onBack: () => void 
         </div>
       </section>
 
-      <section className="text-center mt-5">
-        <div className="fw-bold mb-3">Customer Rating</div>
-        <div className="d-flex justify-content-center gap-4 align-items-center">
-          {[
-            { label: "😡", bg: "#FBE6E7" },
-            { label: "😕", bg: "#FDF5DE" },
-            { label: "🙂", bg: "#FCFBE0" },
-            { label: "😊", bg: "#EEF8E1" },
-            { label: "🟢", bg: "#E6F6E6" },
-          ].map((e, idx) => (
-            <Emoji key={idx} label={e.label} bg={e.bg} active={false} onClick={() => { }} />
-          ))}
-        </div>
-      </section>
+      {/* ======================================================= */}
+      {/* ⚡️ Conditional Rendering: Customer Rating ⚡️ */}
+      {/* ======================================================= */}
+      {selected.status === "Delivered" && (
+        <section className="text-center mt-5">
+          <div className="fw-bold mb-3">Customer Rating</div>
+          <div className="d-flex justify-content-center gap-4 align-items-center">
+            {[
+              { label: "😡", bg: "#FBE6E7" },
+              { label: "😕", bg: "#FDF5DE" },
+              { label: "🙂", bg: "#FCFBE0" },
+              { label: "😊", bg: "#EEF8E1" },
+              { label: "🟢", bg: "#E6F6E6" },
+            ].map((e, idx) => (
+              <Emoji key={idx} label={e.label} bg={e.bg} active={false} onClick={() => { }} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

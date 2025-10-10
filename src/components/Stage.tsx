@@ -22,13 +22,13 @@ const Stage: React.FC<{
     const bgColor = isCompleted
       ? (color === "success" ? "#d4edda" : color === "info" ? "#d1ecf1" : color === "warning" ? "#fff3cd" : "#e2e3e5")
       : isActive
-        ? (color === "success" ? "#d4edda" : color === "info" ? "rgba(13, 202, 240, 1)" : color === "warning" ? "rgba(255, 193, 7, 1)" : "rgba(220, 53, 69, 1)")
+        ? (color === "success" ? "#d4edda" : color === "info" ? "rgba(13, 202, 240, 1)" : color === "warning" ? "rgba(220, 53, 69, 1)" : "rgba(255, 193, 7, 1)")
         : "#e9ecef";
 
     const iconColor = isCompleted
-      ? (color === "success" ? "#155724" : color === "info" ? "#0c5460" : color === "warning" ? "#664d03" : "#6c757d")
+      ? (color === "success" ? "#35dd5cff" : color === "info" ? "#6c757d" : color === "warning" ? "#664d03" : "#6c757d")
       : isActive
-        ? (color === "success" ? "#155724" : color === "info" ? "#0c5460" : color === "warning" ? "#664d03" : "#6c757d")
+        ? (color === "success" ? "#35dd5cff" : color === "info" ? "#6c757d" : color === "warning" ? "#664d03" : "#6c757d")
         : "#6c757d";
 
     const renderContent = () => {
