@@ -22,6 +22,8 @@
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
+  "poxy": "https://api2.agile.in.th",
+
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
