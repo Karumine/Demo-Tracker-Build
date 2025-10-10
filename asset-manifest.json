@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "//karumine.github.io/Demo-Tracker-Build/static/css/main.b5ff1c3f.css",
-    "main.js": "//karumine.github.io/Demo-Tracker-Build/static/js/main.7961b64b.js",
+    "main.js": "//karumine.github.io/Demo-Tracker-Build/static/js/main.eb8d5ede.js",
     "static/js/453.5a67f7ea.chunk.js": "//karumine.github.io/Demo-Tracker-Build/static/js/453.5a67f7ea.chunk.js",
     "static/media/bootstrap-icons.woff?": "//karumine.github.io/Demo-Tracker-Build/static/media/bootstrap-icons.1295669cd4e305c97f2c.woff",
     "static/media/bootstrap-icons.woff2?": "//karumine.github.io/Demo-Tracker-Build/static/media/bootstrap-icons.92ea18a81d737146ff04.woff2",
     "index.html": "//karumine.github.io/Demo-Tracker-Build/index.html",
     "main.b5ff1c3f.css.map": "//karumine.github.io/Demo-Tracker-Build/static/css/main.b5ff1c3f.css.map",
-    "main.7961b64b.js.map": "//karumine.github.io/Demo-Tracker-Build/static/js/main.7961b64b.js.map",
+    "main.eb8d5ede.js.map": "//karumine.github.io/Demo-Tracker-Build/static/js/main.eb8d5ede.js.map",
     "453.5a67f7ea.chunk.js.map": "//karumine.github.io/Demo-Tracker-Build/static/js/453.5a67f7ea.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b5ff1c3f.css",
-    "static/js/main.7961b64b.js"
+    "static/js/main.eb8d5ede.js"
   ]
 }
