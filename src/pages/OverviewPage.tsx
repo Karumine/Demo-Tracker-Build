@@ -84,7 +84,7 @@ function OverviewPage({ onSelect, orders }: { onSelect: (o: Order) => void; orde
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
 
-    const ORDERS_API_URL = "/api/Orders";
+    const ORDERS_API_URL = "https://api2.agile.in.th/api/Orders";
 
     React.useEffect(() => {
         const fetchData = async () => {
