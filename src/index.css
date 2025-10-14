@@ -11,3 +11,24 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+@media print {
+
+  /* ซ่อนพื้นหลังของหน้าจอหลักและคอนเทนต์ด้านนอก Modal */
+  body>.container,
+  body>.row {
+    display: none !important;
+
+  }
+
+  .modal-content {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* ซ่อนปุ่ม Close และปุ่ม Print/Close ใน Modal Footer */
+  .modal-header .btn-close,
+  .modal-footer {
+    display: none !important;
+  }
+}
